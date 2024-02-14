@@ -1,0 +1,191 @@
+mql5
+//+------------------------------------------------------------------+
+//|                                         Amber Waves MT5          |
+//|                                             forexroboteasy.com   |
+//|                                             Forex Robot Easy Team |
+//+------------------------------------------------------------------+
+
+// Global variables
+double stopLoss = 100; // Initial stop-loss level
+double takeProfit = 200; // Initial take-profit level
+int ticket = 0; // Trade ticket number
+
+//+------------------------------------------------------------------+
+//| Expert initialization function                                   |
+//+------------------------------------------------------------------+
+int OnInit()
+{
+    // Set default settings for USDJPY trading
+    SymbolSetString(0, SYMBOL_TRADE_ALLOWED, 'USDJPY', true);
+    SymbolSetInteger(0, SYMBOL_TRADE_STOPS_LEVEL, 20);
+    SymbolSetSpread(0, 2);
+    
+    return(INIT_SUCCEEDED);
+}
+
+//+------------------------------------------------------------------+
+//| Expert deinitialization function                                 |
+//+------------------------------------------------------------------+
+void OnDeinit(const int reason)
+{
+    // Perform any necessary cleanup tasks
+}
+
+//+------------------------------------------------------------------+
+//| Expert start function                                            |
+//+------------------------------------------------------------------+
+void OnStart()
+{
+    // Calculate and display real-time profit and loss for each trade
+    double profitLoss = 0;
+    if(ticket != 0)
+    {
+        profitLoss = OrderProfit(ticket);
+        Print('Current profit/loss: ', profitLoss);
+    }
+
+    // Place buy and sell orders for the specified currency pair
+    ticket = OrderSend(Symbol(), OP_BUY, 1.0, Ask, 0, Bid - stopLoss * MarketInfo(Symbol(), MODE_POINT), Bid + takeProfit * MarketInfo(Symbol(), MODE_POINT));
+    if(ticket > 0)
+    {
+        Print('Buy order placed successfully with ticket ', ticket);
+    }
+    else
+    {
+        Print('Error placing buy order: ', GetLastError());
+    }
+    
+    ticket = OrderSend(Symbol(), OP_SELL, 1.0, Bid, 0, Ask + stopLoss * MarketInfo(Symbol(), MODE_POINT), Ask - takeProfit * MarketInfo(Symbol(), MODE_POINT));
+    if(ticket > 0)
+    {
+        Print('Sell order placed successfully with ticket ', ticket);
+    }
+    else
+    {
+        Print('Error placing sell order: ', GetLastError());
+    }
+}
+
+//+------------------------------------------------------------------+
+//| Expert tick function                                             |
+//+------------------------------------------------------------------+
+void OnTick()
+{
+    // Modify stop-loss and take-profit levels during an active trade
+    if(ticket != 0)
+    {
+        if(OrderSelect(ticket, SELECT_BY_TICKET))
+        {
+            if(OrderType() == OP_BUY)
+            {
+                if(OrderStopLoss() != Bid - stopLoss * MarketInfo(Symbol(), MODE_POINT))
+                {
+                    OrderModify(ticket, OrderOpenPrice(), Bid - stopLoss * MarketInfo(Symbol(), MODE_POINT), OrderTakeProfit(), 0, clrNONE);
+                    Print('Stop-loss modified for buy order with ticket ', ticket);
+                }
+                
+                if(OrderTakeProfit() != Bid + takeProfit * MarketInfo(Symbol(), MODE_POINT))
+                {
+                    OrderModify(ticket, OrderOpenPrice(), OrderStopLoss(), Bid + takeProfit * MarketInfo(Symbol(), MODE_POINT), 0, clrNONE);
+                    Print('Take-profit modified for buy order with ticket ', ticket);
+                }
+            }
+            else if(OrderType() == OP_SELL)
+            {
+                if(OrderStopLoss() != Ask + stopLoss * MarketInfo(Symbol(), MODE_POINT))
+                {
+                    OrderModify(ticket, OrderOpenPrice(), Ask + stopLoss * MarketInfo(Symbol(), MODE_POINT), OrderTakeProfit(), 0, clrNONE);
+                    Print('Stop-loss modified for sell order with ticket ', ticket);
+                }
+                
+                if(OrderTakeProfit() != Ask - takeProfit * MarketInfo(Symbol(), MODE_POINT))
+                {
+                    OrderModify(ticket, OrderOpenPrice(), OrderStopLoss(), Ask - takeProfit * MarketInfo(Symbol(), MODE_POINT), 0, clrNONE);
+                    Print('Take-profit modified for sell order with ticket ', ticket);
+                }
+            }
+        }
+        else
+        {
+            Print('Error selecting order with ticket ', ticket);
+        }
+    }
+}
+
+//+------------------------------------------------------------------+
+//| Expert trade function                                            |
+//+------------------------------------------------------------------+
+void OnTrade()
+{
+    // Handle trade execution errors
+    if(ticket != 0)
+    {
+        if(OrderSelect(ticket, SELECT_BY_TICKET))
+        {
+            if(OrderType() == OP_BUY)
+            {
+                if(OrderState() == ORDER_STATE_FAILED)
+                {
+                    Print('Buy order execution failed with ticket ', ticket);
+                    ticket = 0;
+                }
+            }
+            else if(OrderType() == OP_SELL)
+            {
+                if(OrderState() == ORDER_STATE_FAILED)
+                {
+                    Print('Sell order execution failed with ticket ', ticket);
+                    ticket = 0;
+                }
+            }
+        }
+        else
+        {
+            Print('Error selecting order with ticket ', ticket);
+        }
+    }
+}
+
+//+------------------------------------------------------------------+
+//| Expert custom function                                           |
+//+------------------------------------------------------------------+
+void CustomFunction()
+{
+    // Perform real-time market data updates for accurate trading decisions
+}
+
+//+------------------------------------------------------------------+
+//| Expert tick function                                             |
+//+------------------------------------------------------------------+
+void OnTimer()
+{
+    // Call custom function for real-time market data updates
+    CustomFunction();
+}
+
+//+------------------------------------------------------------------+
+//| Expert start function                                            |
+//+------------------------------------------------------------------+
+void OnTimer()
+{
+    // Call custom function for real-time market data updates
+    CustomFunction();
+}
+
+//+------------------------------------------------------------------+
+//| Expert start function                                            |
+//+------------------------------------------------------------------+
+void OnTimer()
+{
+    // Call custom function for real-time market data updates
+    CustomFunction();
+}
+
+//+------------------------------------------------------------------+
+//| Expert start function                                            |
+//+------------------------------------------------------------------+
+void OnTimer()
+{
+    // Call custom function for real-time market data updates
+    CustomFunction();
+}
